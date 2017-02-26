@@ -94,9 +94,7 @@ public class CountTXBusiness extends Configured implements Tool {
     
 		@Override
 		public int getPartition(Text key, Text value, int numReduceTasks) {
-			// TODO Auto-generated method stub
 			String[] keys = StringUtils.split(key.toString(), ",");
-			
 			return keys[0].hashCode() % numReduceTasks;
 		}
     }
@@ -132,14 +130,11 @@ public class CountTXBusiness extends Configured implements Tool {
         }
         
 	public Configuration getConf() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	
-	public void setConf(Configuration arg0) {
-		// TODO Auto-generated method stub
-		
+	public void setConf(Configuration arg0) {	
 	}
 
 	
