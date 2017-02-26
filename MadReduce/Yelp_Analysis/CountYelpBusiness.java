@@ -1,7 +1,3 @@
-/*
- * Modified Given code to include Palo Alto
- */
-
 package YelpWordCount.YelpWordCount;
 
 
@@ -47,7 +43,6 @@ public class CountYelpBusiness{
 		
 		@Override
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-			//from business
 			String delims = "^";
 			String[] businessData = StringUtils.split(value.toString(),delims);
 			
@@ -97,17 +92,13 @@ public class CountYelpBusiness{
 		job.setOutputKeyClass(Text.class);
 		
 		
-		// set output value type
 		job.setMapOutputValueClass(IntWritable.class);
 		job.setOutputValueClass(IntWritable.class);
 		
 		
-		//set the HDFS path of the input data
 		FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
-		// set the HDFS path for the output 
 		FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
 		
-		//Wait till job completion
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
