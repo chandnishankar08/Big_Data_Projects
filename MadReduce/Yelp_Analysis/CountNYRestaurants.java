@@ -91,25 +91,16 @@ public static class BusinessMap extends Mapper<LongWritable, Text, Text, IntWrit
 	   
 		job.setMapperClass(BusinessMap.class);
 		job.setReducerClass(Reduce.class);
-		//uncomment the following line to add the Combiner
-		//job.setCombinerClass(Reduce.class);
-		
-		// set output key type 
-		
 		job.setOutputKeyClass(Text.class);
 		
 		
 		// set output value type
 		job.setMapOutputValueClass(IntWritable.class);
 		job.setOutputValueClass(IntWritable.class);
-		
-		
-		//set the HDFS path of the input data
+
 		FileInputFormat.addInputPath(job, new Path(otherArgs[0]));
-		// set the HDFS path for the output 
 		FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
 		
-		//Wait till job completion
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 
