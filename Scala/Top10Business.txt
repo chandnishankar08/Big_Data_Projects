@@ -1,0 +1,10 @@
+val business = sc.textFile("assignment3/business.csv").map(line=>line.split("\\^"))
+val busRec = business.map(line=>(line(0),(line(1).toString,line(2).toString)))
+val review = sc.textFile("assignment3/review.csv").map(line=>line.split("\\^"))
+val sumRevStars = review.map(line=>(line(2),line(3).toDouble)).reduceByKey((a,b)=>a+b).distinct
+val countRevRecs =  review.map(line=>(line(2), 1)).reduceByKey((a,b)=>a+b).distinct
+val sumCountRev = sumRevStars.join(countRevRecs)
+val ratingAvg = sumCountRev.map(line=>(line._1, line._2._1/line._2._2))
+val allBusRatings = busRec.join(ratingAvg).distinct.collect()
+val top10 = allBusRatings.sortWith(_._2._2>_._2._2).take(10)
+top10.foreach(line=>println(line._1, line._2._1))

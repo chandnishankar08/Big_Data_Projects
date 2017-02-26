@@ -1,0 +1,5 @@
+divs = load 'NYSE_dividends' as (exchange, symbol, date, dividends);
+bball = load 'baseball' as (name:chararray, team:chararray, position:bag{t:(p:chararray)}, bat:map[]);
+crawl = load 'webcrawl' as (url, pageid);
+prices = load 'NYSE_daily' as (exchange, symbol, date, open, high, low, close, volume, adj_close);
+

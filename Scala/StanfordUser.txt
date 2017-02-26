@@ -1,0 +1,6 @@
+val dataset=sc.textFile("assignment3/business.csv").map(line=>line.split("\\^"))
+val sfFilter=dataset.filter(line=>line(1).contains("Stanford")).map(line=>(line(0).toString,line(1).toString))
+val dataset2=sc.textFile("assignment3/review.csv").map(line=>line.split("\\^"))
+val revId=dataset2.map(line=>(line(2),(line(1).toString,line(3).toString)))
+val jointab=sfFilter.join(revId).collect()
+jointab.foreach(line=>(println(line._2._2._1,line._2._2._2)))

@@ -1,0 +1,76 @@
+// Databricks notebook source exported at Sun, 13 Nov 2016 03:04:07 UTC
+import org.apache.spark._
+import org.apache.spark.rdd.RDD
+import org.apache.spark.util.IntParam
+import org.apache.spark.graphx._
+import org.apache.spark.graphx.util.GraphGenerators
+import org.apache.spark.graphx.lib.TriangleCount
+
+case class SocialNetwork(Person1:Long, Person2:Long)
+def parseSocialNetwork(str: String): SocialNetwork = {
+ val line = str.split(" ")
+ SocialNetwork(line(0).toLong , line(1).toLong)
+}
+val textRDD = sc.textFile("/FileStore/tables/jpop940q1478988156892/twitter_combined.txt")
+val SocialNetworkRDD = textRDD.map(parseSocialNetwork).cache()
+
+val relation = SocialNetworkRDD.map(link => ((link.Person1, link.Person2), 1)).distinct
+relation.take(2)
+
+val edges = relation.map {
+ case ((person1, person2), distance) =>Edge(person1.toLong, person2.toLong, 1) }
+edges.take(1)
+val nowhere = "nowhere"
+
+val graph = Graph.fromEdges(edges, nowhere)
+graph.edges.take(10)
+
+val cc = graph.connectedComponents().vertices
+
+cc.collect()
+cc.take(1)
+
+val clusters = cc.map( vertex => vertex._2).distinct
+clusters.collect()
+
+val vertices = graph.numVertices
+val edges = graph.numEdges
+
+val scc = graph.stronglyConnectedComponents(10)
+val sccVerts = scc.vertices
+sccVerts.collect()
+val sccEdges = scc.edges
+
+val sccClusterVerts = sccVerts.map(link => (link._2)).distinct
+sccClusterVerts.count()
+val mapSccVerts = sccVerts.map(link => (link._2, 1))
+mapSccVerts.collect()
+val sccVertCount = mapSccVerts.reduceByKey((a,b) => a+ b)
+sccVertCount.count()
+
+val thresSccVerts = sccVertCount.filter(x => x._2 >= 3)
+thresSccVerts.count()
+
+sccEdges.count()
+
+val mapVertLists = sccVerts.map{case (k, v) => v -> List(k)}
+mapVertLists.collect()
+val redVertLists = mapVertLists.reduceByKey(_ ::: _)
+
+val sccAThres = redVertLists.filter(x => x._2.length > 2)
+sccAThres.count()
+
+val den=scc.edges.distinct().count()
+var dm  = List[(Long,Float)]()
+for(v <- sccAThres.collect()) {
+  val sub=scc.subgraph(vpred = (id1,id2) => id2 == v._1).edges.distinct().count()
+  val tightness=sub.toFloat/den
+  println(v._1, tightness)
+  dm :::= List((v._1, tightness))
+}
+
+val listMap = dm.toMap
+
+import scala.collection.mutable.ListMap
+ListMap(listMap.toSeq.sortBy(_._2):_*)
+

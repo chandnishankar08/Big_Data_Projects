@@ -1,0 +1,57 @@
+//Question 1:
+grpd = group prices by symbol;
+avgClosingPrices = foreach grpd generate group, AVG(prices.close);
+store avgClosingPrices into 'pig/output1';
+
+//Question 2:
+describe divs;
+divs: {exchange: bytearray,symbol: bytearray,date: bytearray,dividends: bytearray}
+grpdiv = group divs by symbol;
+describe grpdiv;
+maxDiv = foreach grpdiv generate group, MAX(divs.dividends);
+store maxDiv into 'pig/output2';
+
+//Question 3:
+jpd = join divs by symbol, prices by symbol;
+grjpd = group jpd by divs::symbol;
+avgVal = foreach grjpd GENERATE group, AVG(jpd.divs::dividends), AVG(jpd.prices::open);
+store avgVal into 'pig/output3';
+
+//Question 4:
+players = load 'baseball' as (name:chararray, team:chararray, position:bag{t:(p:chararray)}, bat:map[]);
+(Ben Zobrist,Tampa Bay Rays,{(Infielder),(Outfielder),(Shortstop),(Second_baseman),(Right_fielder)},[on_base_percentage#0.346,hit_by_pitch#5,games#297,grand_slams#4,home_runs#42,gdb#14,sacrifice_flies#11,at_bats#979,base_on_balls#129,ibbs#6,sacrifice_hits#5,hits#255,rbis#148,slugging_percentage#0.459,batting_average#0.26,triples#11,doubles#46,strikeouts#188,runs#141])
+(Joel Zumaya,Detroit Tigers,{(Pitcher),(Relief_pitcher)},[games#64])
+
+pos = foreach players generate name, flatten(position) as position; 
+bypos = group pos by position; 
+playcount = foreach bypos GENERATE group, COUNT(pos.name);
+store playcount into 'pig/output4';
+
+//Question 5:
+divs = load 'NYSE_dividends' as (exchange, symbol, date, dividends);
+prices = load 'NYSE_daily' as (exchange, symbol, date, open, high, low, close, volume, adj_close);
+grpd = COGROUP divs by symbol, prices by symbol;
+nodivs = FILTER grpd by COUNT(divs) == 0;  
+describe nodivs;
+out = foreach nodivs GENERATE flatten(prices);
+store out into 'pig/output5';
+
+//Question 6:
+crawl = load 'webcrawl' as (url, pageid, outpages:bag{t:(p:chararray)} );
+fltnd = foreach crawl generate url, flatten(outpages) as outpage;
+grpd = group fltnd by url;
+outcount = foreach grpd generate group, COUNT(fltnd.outpage) as outlinks;
+store outcount into 'pig/outcount';grpdin = group fltnd by outpage;
+incount = foreach grpdin generate group, COUNT(fltnd.url) as inlinks;
+jlinks = join outcount by group full outer , incount by group;
+countOut = FOREACH jlinks GENERATE ((outcount::group IS NOT NULL)? (outcount::group):(incount::group))  as url, ((outcount::outlinks IS NULL)? 0:(outcount::outlinks)) as outlink_count, ((incount::inlinks IS NULL)? 0:(incount::inlinks)) as inlink_count;
+store countOut into 'pig/output6';
+
+//Question 8:
+players = foreach bball generate name, team;
+describe players;
+gplay = GROUP players by team;
+countPlay = FOREACH gplay GENERATE group, COUNT(players.name) as count;
+orderTeams = order countPlay by count desc;
+top5 = limit orderTeams 5;
+store top5 into 'pig/output8';

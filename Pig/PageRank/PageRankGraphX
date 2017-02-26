@@ -1,0 +1,37 @@
+// Databricks notebook source exported at Mon, 7 Nov 2016 06:36:53 UTC
+import org.apache.spark._
+import org.apache.spark.rdd.RDD
+import org.apache.spark.util.IntParam
+import org.apache.spark.graphx._
+import org.apache.spark.graphx.util.GraphGenerators
+
+case class pages(url:Long, outlink:Long)
+def parsePages(str: String): pages = {
+ val line = str.split(",")
+ pages(line(0).toLong, line(1).toLong)
+}
+
+val textRDD = sc.textFile("/FileStore/tables/kzwwuus91478499911265/inputProcessed.txt")
+
+val pagesRDD = textRDD.map(parsePages).cache()
+
+val links = pagesRDD.map(link => ((link.url, link.outlink), 1))
+
+links.take(2)
+
+val edges = links.map {
+ case ((link1, link2), distance) =>Edge(link1.toLong, link2.toLong, 1) }
+
+edges.take(2)
+
+val nowhere = "nowhere"
+
+val graph = Graph.fromEdges(edges, nowhere)
+graph.edges.take(2)
+
+val ranks = graph.pageRank(0.01).vertices
+ranks.take(1)
+
+val highestRank = ranks.sortBy(_._2, false)
+highestRank.take(5)
+
