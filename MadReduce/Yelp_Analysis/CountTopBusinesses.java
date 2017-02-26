@@ -1,5 +1,5 @@
 /*
- * Modified code to find top 10 businesses according to zipcode
+ * Code to find top 10 businesses according to zipcode
  */
 package YelpWordCount.YelpWordCount;
 
@@ -34,7 +34,6 @@ public class CountTopBusinesses {
         job.setJobName("Count Top Businesses");
         job.setJarByClass(CountTopBusinesses.class);
         job.setMapperClass(TopNMapper.class);
-        //job.setCombinerClass(TopNReducer.class);
         job.setReducerClass(TopNReducer.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
