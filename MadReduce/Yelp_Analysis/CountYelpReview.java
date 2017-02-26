@@ -1,5 +1,5 @@
 /*
- * Modified existing code to display just top 10 business with highest rating
+ * Code to display just top 10 business with highest rating
  */
 package YelpWordCount.YelpWordCount;
 import java.io.BufferedReader;
